@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ტესტები</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/quiz.css">
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<!-- Quiz data files (each registers to QUIZ_REGISTRY) -->
+<script src="data/quiz-data.js"></script>
+<script src="data/STEM-სკოლის-მისაღები-გამოცდა-2023-სექტემბერი-მეშვიდე-მერვე-კლასებისთვის.js"></script>
+<script src="data/STEM-სკოლის-მისაღები-გამოცდა-2023-სექტემბერი-მეცხრე-მეათე-კლასებისთვის.js"></script>
+<script src="js/quiz.js"></script>
+</head>
+<body x-data="quizApp()">
+
+<!-- ======== TEST SELECTION SCREEN ======== -->
+<template x-if="screen === 'select'">
+  <div class="select-screen">
+    <h1 class="select-title">აირჩიე ტესტი</h1>
+    <p class="select-subtitle">აირჩიე ტესტი დასაწყებად</p>
+    <div class="test-list">
+      <template x-for="test in tests" :key="test.id">
+        <button class="test-card" @click="selectTest(test.id)">
+          <div class="test-card-title" x-text="test.title"></div>
+          <div class="test-card-info" x-text="`${test.questions.length} კითხვა`"></div>
+        </button>
+      </template>
+    </div>
+  </div>
+</template>
+
+<!-- ======== QUIZ SCREEN ======== -->
+<template x-if="screen === 'quiz'">
+  <div>
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button class="back-btn" @click="backToMenu()">&#8592; მენიუ</button>
+        <h1 x-text="title">ტესტი</h1>
+      </div>
+      <div class="progress-wrap">
+        <span class="progress-text" x-text="`${answered} / ${totalQuestions}`">0 / 30</span>
+        <div class="progress-bar">
+          <div class="progress-fill" :style="`width: ${progress}%`"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Questions Container -->
+    <div class="container">
+      <template x-for="(q, qi) in questions" :key="q.id">
+        <div class="question-card" :class="cardClass(qi)" :style="cardDelay(qi)">
+          <div class="q-header">
+            <div class="q-number" x-text="q.id"></div>
+          </div>
+          <div class="q-text" x-text="q.text"></div>
+          <template x-if="q.image">
+            <div class="q-image">
+              <img :src="q.image" :alt="`სურათი კითხვა ${q.id}`">
+            </div>
+          </template>
+          <div class="options">
+            <template x-for="(opt, oi) in q.options" :key="oi">
+              <button class="option"
+                      :class="optionClass(qi, oi)"
+                      @click="selectAnswer(qi, oi)"
+                      :disabled="isAnswered(qi)">
+                <span class="letter" x-text="letter(oi)"></span>
+                <span x-text="opt"></span>
+              </button>
+            </template>
+          </div>
+          <template x-if="isAnswered(qi)">
+            <div :class="explanationClass(qi)">
+              <div class="exp-title">
+                <span x-text="explanationIcon(qi)"></span> ახსნა
+              </div>
+              <p x-html="q.explanation"></p>
+            </div>
+          </template>
+        </div>
+      </template>
+    </div>
+
+    <!-- Bottom Result Bar -->
+    <div class="result-bar">
+      <div class="stat">
+        <div class="stat-label">სწორი</div>
+        <div class="stat-value green" x-text="correct">0</div>
+      </div>
+      <div class="score-display">
+        <span class="num" x-text="correct">0</span><span class="sep">/</span><span x-text="totalQuestions">30</span>
+      </div>
+      <div class="stat">
+        <div class="stat-label">არასწორი</div>
+        <div class="stat-value red" x-text="wrong">0</div>
+      </div>
+      <button class="btn-reset" @click="reset()">თავიდან</button>
+    </div>
+  </div>
+</template>
+
+</body>
+</html>
